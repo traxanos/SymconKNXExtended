@@ -1,0 +1,69 @@
+  {
+    "elements": [
+        {
+            "type": "List",
+            "name": "List",
+            "add": true,
+            "delete": true,
+            "sort": {
+                "column": "Ident",
+                "direction": "ascending"
+            },
+            "columns": [
+                {
+                    "caption": "Ident",
+                    "name": "Ident",
+                    "width": "auto",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox",
+                        "validate": "^[A-Za-z0-9_]*$"
+                    }
+                },
+                {
+                    "caption": "Control GA",
+                    "name": "ControlGA",
+                    "width": "120px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox",
+                        "validate": "^(?:(?:1[0-5]|[0-9])\/[0-8]\/(?:1?[0-9]{1,2}|25[0-5]|2[0-4][0-9]|[0-9]))?$"
+                    }
+                },
+                {
+                    "caption": "Status GA",
+                    "name": "StatusGA",
+                    "width": "120px",
+                    "add": "",
+                    "edit": {
+                        "type": "ValidationTextBox",
+                        "validate": "^(?:(?:1[0-5]|[0-9])\/[0-8]\/(?:1?[0-9]{1,2}|25[0-5]|2[0-4][0-9]|[0-9]))?$"
+                    }
+                },
+                {
+                    "caption": "Aktor",
+                    "name": "Aktor",
+                    "width": "120px",
+                    "add": false,
+                    "edit": {
+                        "type": "CheckBox"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Anleitung",
+            "items": [
+                {
+                    "type": "Label",
+                    "caption": "Test"
+                }
+            ]
+        }
+    ],
+    "actions": [
+    ],
+    "status": [
+    ]
+  }

@@ -1,0 +1,11 @@
+  {
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "Starten Sie mit dem Button \"DEBUG\" oben rechts den Gruppenmonitor." }
+    ],
+    "actions": [
+    ],
+    "status": [
+    ]
+  }

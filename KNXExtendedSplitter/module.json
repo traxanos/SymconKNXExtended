@@ -1,0 +1,19 @@
+{
+    "id": "{0722B5E9-2D05-4388-B48F-6EAD4A6400CD}",
+    "name": "KNXExtendedSplitter",
+    "type": 2,
+    "vendor": "KNX",
+    "aliases": ["KNX Extended Splitter"],
+    "parentRequirements": [
+        "{42DFD4E4-5831-4A27-91B9-6FF1B2960260}"
+    ],
+    "childRequirements": [
+        "{94CC3F77-1E0A-4C7E-E3EF-466FF1589084}"
+    ],
+    "implemented": [
+        "{8A4D3B17-F8D7-4905-877F-9E69CEC3D579}",
+        "{9F36EA2E-A354-116A-AF03-D80DC15111C3}"
+    ],
+    "prefix": "KNXE",
+    "url": "http://github.com/traxanos"
+}

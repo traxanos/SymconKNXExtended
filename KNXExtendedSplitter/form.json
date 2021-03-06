@@ -1,0 +1,65 @@
+{
+    "elements": [
+        {
+            "type": "ExpansionPanel",
+            "caption": "Importer",
+            "items": [
+                {
+                    "type": "SelectFile",
+                    "name": "GroupAddressFile",
+                    "caption": "XML Datei",
+                    "extensions": ".xml"
+                },
+                {
+                    "type": "Label",
+                    "caption": "Es kann ein GA-Export (wie für den KNX Konfigurator) oder besser noch die \"P-xxx/0.xml\" aus der .knxproj (einfach entpacken) verwendet werden.\nDie 0.xml beinhaltet genauere DPT-Angabe und sollte daher bevorzugt werden."
+                },
+                {
+                    "type": "Label",
+                    "caption": "Alle DPTs sollten immer auf einen Subtyp DPST ausgewählt haben (per ETS). Sollte das nicht der fall sein so wird dieser Gelb markiert. Rote GAs werden nicht unterstützt und wird ignoriert."
+                }
+            ]
+        },
+        {
+            "type": "List",
+            "name": "GroupAddressTable",
+            "columns": [
+                {
+                    "caption": "GA",
+                    "name": "GroupAddress",
+                    "sortColumn": "Number",
+                    "width": "100px"
+                },
+                {
+                    "caption": "Hauptgruppe",
+                    "width": "120px",
+                    "name": "GroupName1"
+                },
+                {
+                    "caption": "Mittelgruppe",
+                    "width": "120px",
+                    "name": "GroupName2"
+                },
+                {
+                    "caption": "Untergruppe",
+                    "width": "auto",
+                    "name": "GroupName3"
+                },
+                {
+                    "caption": "Description",
+                    "width": "150px",
+                    "name": "Description"
+                },
+                {
+                    "caption": "DPT",
+                    "width": "100px",
+                    "name": "DPT"
+                }
+            ]
+        }
+    ],
+    "actions": [
+    ],
+    "status": [
+    ]
+}

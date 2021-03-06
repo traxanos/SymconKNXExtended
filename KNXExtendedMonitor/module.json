@@ -1,0 +1,16 @@
+{
+    "id": "{092B78D3-1E57-AAEE-947D-F7418C605A0E}",
+    "name": "KNXExtendedMonitor",
+    "type": 3,
+    "vendor": "KNX",
+    "aliases": ["KNX Extended Monitor"],
+    "parentRequirements": [
+        "{9F36EA2E-A354-116A-AF03-D80DC15111C3}"
+    ],
+    "childRequirements": [],
+    "implemented": [
+        "{94CC3F77-1E0A-4C7E-E3EF-466FF1589084}"
+    ],
+    "prefix": "KNXE",
+    "url": "http://github.com/traxanos"
+}
