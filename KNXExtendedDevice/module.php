@@ -102,7 +102,6 @@ class KNXExtendedDevice extends IPSModule
             $list = json_decode($this->ReadPropertyString('List'), true);
             if ($list) {
                 foreach ($list as $data) {
-                    #$this->LogMessage(print_r($data, 1), KL_MESSAGE);
                     $dptData = false;
                     $groupData = false;
                     if ($data['StatusGA']) {
@@ -283,8 +282,6 @@ class KNXExtendedDevice extends IPSModule
                 $this->GetBuffer('actuatorScripts'), true
             );
         }
-
-        $this->SendDebug('LoadActuatorScripts', print_r($this->actuatorScripts, 1), 0);
     }
 
     private function RegisterReceiveGA($ga, $ident)
