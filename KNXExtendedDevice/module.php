@@ -210,15 +210,21 @@ class KNXExtendedDevice extends IPSModule
         if($scriptId = @$this->actuatorScripts[$ident]) {
             $this->ExecuteActuatorScript($ident, $value);
         } else {
-            $this->ApplyValue($ident, $value);
+            $this->LoadSendingGA();
+            if($ga = @$this->sendingGroupAddresses[$ident]) {
+                // Sende auf Bus und warte auf Status
+                $this->SendValueToParent($ga, $value);
+            } else {
+                // Keine Control GA daher direkt speichern
+                SetValue($this->GetIDForIdent($ident), $value);
+            }
         }
     }
 
-    public function ApplyValue(string $ident, $value) {
+    public function SendValueToBus(string $ident) {
         $this->LoadSendingGA();
         if($ga = @$this->sendingGroupAddresses[$ident]) {
-            SetValue($this->GetIDForIdent($ident), $value);
-            $this->SendValueToParent($ga, $value);
+            $this->SendValueToParent($ga, GetValue($this->GetIDForIdent($ident)));
         }
     }
 
