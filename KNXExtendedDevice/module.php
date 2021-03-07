@@ -40,9 +40,9 @@ class KNXExtendedDevice extends IPSModule
         $input = json_decode($JSONString, true);
         $input['Data'] = utf8_decode($input['Data']);
 
-        $this->SendDebug("RECV | " . $input['GroupAddress'], $input['Value'], 0);
-
         if ($input['ReadRequest']) {
+            $this->SendDebug("READ", $input['GroupAddress'], 0);
+
             $this->LoadAnswerGA();
             if($ident = @$this->answerGroupAddresses[$input['GroupAddress']]) {
                 $answerCall = json_encode(
@@ -58,6 +58,8 @@ class KNXExtendedDevice extends IPSModule
                 );
             }
         } else {
+            $this->SendDebug("RECV | " . $input['GroupAddress'], $input['Value'], 0);
+
             $this->LoadReceiveGA();
             if($idents = @$this->receiveGroupAddresses[$input['GroupAddress']]) {
                 foreach($idents as $ident) {
