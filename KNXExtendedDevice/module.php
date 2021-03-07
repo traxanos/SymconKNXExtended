@@ -221,8 +221,12 @@ class KNXExtendedDevice extends IPSModule
         }
     }
 
-    public function SendValueToBus(string $ident) {
+    public function SendValueToBus(int $variableId) {
         $this->LoadSendingGA();
+
+        $objectData = IPS_GetObject($variableId);
+        $ident = $objectData['ObjectIdent'];
+
         if($ga = @$this->sendingGroupAddresses[$ident]) {
             $this->SendValueToParent($ga, GetValue($this->GetIDForIdent($ident)));
         }
