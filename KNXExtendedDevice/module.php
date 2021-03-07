@@ -6,7 +6,7 @@ class KNXExtendedDevice extends IPSModule
     public $receiveGroupAddresses = null;
     public $answerGroupAddresses = null;
     public $sendingGroupAddresses = null;
-
+    public $actuatorScripts = null;
     public $groupAddressData = null;
 
     public function Create()
@@ -61,9 +61,14 @@ class KNXExtendedDevice extends IPSModule
             $this->SendDebug("RECV | " . $input['GroupAddress'], $input['Value'], 0);
 
             $this->LoadReceiveGA();
+
             if($idents = @$this->receiveGroupAddresses[$input['GroupAddress']]) {
                 foreach($idents as $ident) {
-                    SetValue($this->GetIDForIdent($ident), $input['Value']);
+                    $status = $this->ExecuteActuatorScript($ident, $input['Value']);
+
+                    if(!$status) {
+                        SetValue($this->GetIDForIdent($ident), $input['Value']);
+                    }
                 }
             }
         }
@@ -85,6 +90,7 @@ class KNXExtendedDevice extends IPSModule
         $this->receiveGroupAddresses = array();
         $this->answerGroupAddresses = array();
         $this->sendingGroupAddresses = array();
+        $this->actuatorScripts = array();
 
         $recvGA = array();
         $sendGA = array();
@@ -96,6 +102,7 @@ class KNXExtendedDevice extends IPSModule
             $list = json_decode($this->ReadPropertyString('List'), true);
             if ($list) {
                 foreach ($list as $data) {
+                    #$this->LogMessage(print_r($data, 1), KL_MESSAGE);
                     $dptData = false;
                     $groupData = false;
                     if ($data['StatusGA']) {
@@ -131,11 +138,14 @@ class KNXExtendedDevice extends IPSModule
                     }
 
                     // Register Addresses
-                    if ($data['Aktor']) {
+                    if (isset($data['ActuatorScript']) && $data['ActuatorScript'] > 0) {
+                        $actor = true;
                         $this->RegisterAnswerGA($data['StatusGA'], $data['Ident']);
                         $this->RegisterSendingGA($data['StatusGA'], $data['Ident']);
                         $this->RegisterReceiveGA($data['ControlGA'], $data['Ident']);
+                        $this->RegisterActuatorScript($data['Ident'], $data['ActuatorScript']);
                     } else {
+                        $actor = false;
                         $this->RegisterReceiveGA($data['StatusGA'], $data['Ident']);
                         $this->RegisterSendingGA($data['ControlGA'], $data['Ident']);
                     }
@@ -153,8 +163,8 @@ class KNXExtendedDevice extends IPSModule
 
                     $this->MaintainAction(
                         $data['Ident'],
-                        (($data['Aktor'] && $data['StatusGA'] != '' ) ||
-                            (!$data['Aktor'] && $data['ControlGA'] != ''))
+                        (($actor && $data['StatusGA'] != '' ) ||
+                            (!$actor && $data['ControlGA'] != ''))
                     );
                 }
             }
@@ -162,6 +172,7 @@ class KNXExtendedDevice extends IPSModule
             $this->SetBuffer('receiveGroupAddresses', json_encode($this->receiveGroupAddresses));
             $this->SetBuffer('sendingGroupAddresses', json_encode($this->sendingGroupAddresses));
             $this->SetBuffer('answerGroupAddresses', json_encode($this->answerGroupAddresses));
+            $this->SetBuffer('actuatorScripts', json_encode($this->actuatorScripts));
 
             $this->SetGroupAddressFilter();
         }
@@ -197,12 +208,16 @@ class KNXExtendedDevice extends IPSModule
             return;
         }
 
-        $this->SendDebug("Send $ident", $value, 0);
-
         $this->LoadSendingGA();
-        if(isset($this->sendingGroupAddresses[$ident])) {
-            $this->SendValueToParent($this->sendingGroupAddresses[$ident], $value);
+        if($ga = @$this->sendingGroupAddresses[$ident]) {
+            $this->SendValueToParent($ga, $value);
         }
+
+        $this->LoadActuatorScripts();
+        if(isset($this->actuatorScripts[$ident])) {
+            SetValue($this->GetIDForIdent($ident), $value);
+        }
+        
     }
 
     private function GetGroupAddressData(string $groupAddress) {
@@ -257,7 +272,19 @@ class KNXExtendedDevice extends IPSModule
         }
     }
 
-    private function RegisterReceiveGA(string $ga, string $ident)
+    private function LoadActuatorScripts()
+    {
+        if (!$this->actuatorScripts)
+        {
+            $this->actuatorScripts = json_decode(
+                $this->GetBuffer('actuatorScripts'), true
+            );
+        }
+
+        $this->SendDebug('LoadActuatorScripts', print_r($this->actuatorScripts, 1), 0);
+    }
+
+    private function RegisterReceiveGA($ga, $ident)
     {
         if (!$ga) {
             return false;
@@ -293,6 +320,16 @@ class KNXExtendedDevice extends IPSModule
         return true;
     }
 
+    private function RegisterActuatorScript(string $ident, $actuatorScriptId)
+    {
+        if (!$ident) {
+            return false;
+        }
+
+        $this->actuatorScripts[$ident] = $actuatorScriptId;
+        return true;
+    }
+
     private function GetVariableTypByType(string $type) {
         if ($type == 'boolean') {
             return 0;
@@ -303,6 +340,29 @@ class KNXExtendedDevice extends IPSModule
         }
 
         return 3;
+    }
+
+    private function ExecuteActuatorScript($ident, $value) {
+        $this->LoadActuatorScripts();
+
+        if($scriptId = @$this->actuatorScripts[$ident]) {
+            if(IPS_ScriptExists($scriptId)) {
+                $this->SendDebug('ExecuteActuatorScript', $ident, 0);
+                IPS_RunScriptEx(
+                    $scriptId,
+                    array(
+                        'IDENT' => $ident,
+                        'VALUE' => $value,
+                        'VARIABLE' => $this->GetIDForIdent($ident),
+                        'INSTANCE' => $this->InstanceID
+                    )
+                );
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function MaintainProfile(string $dpt) {

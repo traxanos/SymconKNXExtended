@@ -13,7 +13,7 @@
                 {
                     "caption": "Ident",
                     "name": "Ident",
-                    "width": "auto",
+                    "width": "250px",
                     "add": "",
                     "edit": {
                         "type": "ValidationTextBox",
@@ -23,7 +23,7 @@
                 {
                     "caption": "Control GA",
                     "name": "ControlGA",
-                    "width": "120px",
+                    "width": "100px",
                     "add": "",
                     "edit": {
                         "type": "ValidationTextBox",
@@ -33,7 +33,7 @@
                 {
                     "caption": "Status GA",
                     "name": "StatusGA",
-                    "width": "120px",
+                    "width": "100px",
                     "add": "",
                     "edit": {
                         "type": "ValidationTextBox",
@@ -41,12 +41,12 @@
                     }
                 },
                 {
-                    "caption": "Aktor",
-                    "name": "Aktor",
-                    "width": "120px",
-                    "add": false,
+                    "caption": "Aktor Script",
+                    "name": "ActuatorScript",
+                    "width": "auto",
+                    "add": 0,
                     "edit": {
-                        "type": "CheckBox"
+                        "type": "SelectScript"
                     }
                 }
             ]
