@@ -352,17 +352,27 @@ class KNXExtendedDevice extends IPSModule
         $this->LoadActuatorScripts();
 
         if($scriptId = @$this->actuatorScripts[$ident]) {
+            $this->SendDebug('ExecuteActuatorScript', $ident, 0);
             if(IPS_ScriptExists($scriptId)) {
-                $this->SendDebug('ExecuteActuatorScript', $ident, 0);
-                IPS_RunScriptEx(
-                    $scriptId,
-                    array(
-                        'IDENT' => $ident,
-                        'VALUE' => $value,
-                        'VARIABLE' => $this->GetIDForIdent($ident),
-                        'INSTANCE' => $this->InstanceID
-                    )
+                $data = array(
+                    'IDENT' => $ident,
+                    'VALUE' => $value,
+                    'VARIABLE' => $this->GetIDForIdent($ident),
+                    'INSTANCE' => $this->InstanceID
                 );
+                $data = serialize($data);
+                $execute = "IPS_RunScriptEx($scriptId, unserialize('$data'));";
+                $this->RegisterOnceTimer('ExecuteActuatorScript', $execute);
+                // $this->SendDebug("Script", $execute, 0);
+                // IPS_RunScriptEx(
+                //     $scriptId,
+                //     array(
+                //         'IDENT' => $ident,
+                //         'VALUE' => $value,
+                //         'VARIABLE' => $this->GetIDForIdent($ident),
+                //         'INSTANCE' => $this->InstanceID
+                //     )
+                // );
 
                 return true;
             }
