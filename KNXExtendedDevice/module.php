@@ -208,16 +208,19 @@ class KNXExtendedDevice extends IPSModule
             return;
         }
 
+        if($scriptId = @$this->actuatorScripts[$ident]) {
+            $this->ExecuteActuatorScript($ident, $value);
+        } else {
+            $this->ApplyValue($ident, $value);
+        }
+    }
+
+    public function ApplyValue(string $ident, $value) {
         $this->LoadSendingGA();
         if($ga = @$this->sendingGroupAddresses[$ident]) {
+            SetValue($this->GetIDForIdent($ident), $value);
             $this->SendValueToParent($ga, $value);
         }
-
-        $this->LoadActuatorScripts();
-        if(isset($this->actuatorScripts[$ident])) {
-            SetValue($this->GetIDForIdent($ident), $value);
-        }
-        
     }
 
     private function GetGroupAddressData(string $groupAddress) {
@@ -342,7 +345,7 @@ class KNXExtendedDevice extends IPSModule
         return 3;
     }
 
-    private function ExecuteActuatorScript($ident, $value) {
+    private function ExecuteActuatorScript(string $ident, $value) {
         $this->LoadActuatorScripts();
 
         if($scriptId = @$this->actuatorScripts[$ident]) {
