@@ -24,15 +24,7 @@ class KNXExtendedSplitter extends IPSModule
     public function ApplyChanges()
     {
         parent::ApplyChanges();
-
-        $this->RegisterMessage($this->InstanceID, IM_CHANGESETTINGS);
-    }
-
-    public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
-    {
-        if ($Message == IM_CHANGESETTINGS) {
-            $this->LoadXMLFile(); 
-        }
+        $this->LoadXMLFile();
     }
 
     public function ReceiveData($JSONString)
@@ -438,6 +430,12 @@ class KNXExtendedSplitter extends IPSModule
 
         if($this->ReadPropertyString('GroupAddressFile')) {
             $xml = base64_decode($this->ReadPropertyString('GroupAddressFile'));
+            $hash = sha1($xml);
+
+            if($this->ReadAttributeString('GroupAddressFileHash') == $hash) {
+                return;
+            }
+            $this->WriteAttributeString('GroupAddressFileHash', $hash);
 
             $simplexml = simplexml_load_string($xml);
             if (isset($simplexml->GroupRange)) {
@@ -485,11 +483,10 @@ class KNXExtendedSplitter extends IPSModule
                     }
                 }
             }
+            uksort($result, array('KNXExtendedSplitter', 'SortGroupAddress'));
         }
 
-        uksort($result, array('KNXExtendedSplitter', 'SortGroupAddress'));
         $this->WriteAttributeString('GroupAddressTable', json_encode($result));
-        return $result;
     }
 
     private function LoadGroupAddressTable() {
