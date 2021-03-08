@@ -704,6 +704,59 @@ KNXExtendedSplitter::$dpts = array (
     ),
     'Unit' => 'fan stage',
   ),
+  'DPT-6' => 
+  array (
+    'Name' => '6.xxx',
+    'Text' => '8-bit signed value',
+    'Profile' => '',
+    'Type' => 'integer',
+    'Validation' => 
+    array (
+      'Min' => -128,
+      'Max' => 127,
+    ),
+  ),
+  'DPST-6-1' => 
+  array (
+    'Name' => 'DPT_Percent_V8',
+    'Text' => 'percentage (-128..127%)',
+    'Parent' => 'DPT-6',
+    'Type' => 'integer',
+    'Profile' => '',
+    'Validation' => 
+    array (
+      'Min' => -128,
+      'Max' => 127,
+    ),
+    'Unit' => '%',
+  ),
+  'DPST-6-10' => 
+  array (
+    'Name' => 'DPT_Value_1_Count',
+    'Text' => 'counter pulses (-128..127)',
+    'Parent' => 'DPT-6',
+    'Type' => 'integer',
+    'Profile' => '',
+    'Validation' => 
+    array (
+      'Min' => -128,
+      'Max' => 127,
+    ),
+    'Unit' => 'counter pulses',
+  ),
+  'DPST-6-20' => 
+  array (
+    'Name' => 'DPT_Status_Mode3',
+    'Text' => 'status with mode',
+    'Parent' => 'DPT-6',
+    'Type' => 'integer',
+    'Profile' => '',
+    'Validation' => 
+    array (
+      'Min' => -128,
+      'Max' => 127,
+    ),
+  ),
   'DPT-7' => 
   array (
     'Name' => '7.xxx',

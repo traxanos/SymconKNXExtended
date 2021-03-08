@@ -9,6 +9,7 @@ $supported[] = 'DPT-1';
 $supported[] = 'DPT-2';
 $supported[] = 'DPT-4';
 $supported[] = 'DPT-5';
+$supported[] = 'DPT-6';
 $supported[] = 'DPT-7';
 $supported[] = 'DPT-8';
 $supported[] = 'DPT-9';
@@ -74,6 +75,9 @@ if (isset($simplexml->MasterData)) {
             $item['Type'] = 'integer';
             $item['Profile'] = '~Intensity.255';
             $item['Validation'] = array('Min' => 0, 'Max' => 255);
+        } elseif($id == 'DPT-6') {
+            $item['Type'] = 'integer';
+            $item['Validation'] = array('Min' => -128, 'Max' => 127);
         } elseif($id == 'DPT-7') {
             $item['Type'] = 'integer';
             $item['Validation'] = array('Min' => 0, 'Max' => 65535);
