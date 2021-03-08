@@ -197,6 +197,7 @@ class KNXExtendedDevice extends IPSModule
     }
 
     public function RequestAction($ident, $value) {
+        // Spezialhandling
         if ($ident == 'INTERNAL_SEND_ANSWER') {
             $value = json_decode($value);
             $this->SendAnswer($value->GroupAddress, $value->Ident);
@@ -208,15 +209,25 @@ class KNXExtendedDevice extends IPSModule
         }
 
         if($scriptId = @$this->actuatorScripts[$ident]) {
+            // Gibt es ein Aktorscript dann muss sich dieses um alles kümmern
             $this->ExecuteActuatorScript($ident, $value);
         } else {
+            // Son
             $this->LoadSendingGA();
-            if($ga = @$this->sendingGroupAddresses[$ident]) {
-                // Sende auf Bus und warte auf Status
-                $this->SendValueToParent($ga, $value);
+            $variableId = $this->GetIDForIdent($ident);
+            $sendingGA = @$this->sendingGroupAddresses[$ident];
+            $receiveGA = @$this->receiveGroupAddresses[$ident];
+            if($sendingGA) {
+                // Sende auf Bus
+                $this->SendValueToParent($sendingGA, $value);
+                // Sollte ControlGA und StatusGA identisch sein
+                // so übernehme den Wert direkt, da dann kein Status update kommt
+                if ($receiveGA) {
+                    SetValue($variableId, $value);
+                }
             } else {
                 // Keine Control GA daher direkt speichern
-                SetValue($this->GetIDForIdent($ident), $value);
+                SetValue($variableId, $value);
             }
         }
     }

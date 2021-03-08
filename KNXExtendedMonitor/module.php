@@ -17,14 +17,6 @@ class KNXExtendedMonitor extends IPSModule
         $this->DebugReceiveData($input);
     }
 
-    public function Test($value) {
-        $output = array();
-        $output['DataID'] = "{9F36EA2E-A354-116A-AF03-D80DC15111C3}";
-        $output['GroupAddress'] = '0/0/7';
-        $output['Value'] = $value;
-        $this->SendDataToParent(json_encode($output));
-    }
-
     private function DebugReceiveData($input) {
         if (isset($input['GroupName'])) {
             $msg = $input['GroupName'] .' (' . $input['GroupAddress'] . ')';
