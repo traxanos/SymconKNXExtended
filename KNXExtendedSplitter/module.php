@@ -455,6 +455,7 @@ class KNXExtendedSplitter extends IPSModule
                 foreach ($group1->GroupRange as $group2) {
                     $group_name_2 = (string)$group2['Name'];
                     foreach ($group2->GroupAddress as $group3) {
+                        $dpt = null;
                         $group_name_3 = (string)$group3['Name'];
                         $description = (string)$group3['Description'];
                         if (strpos($group3['Address'], '/') == 0) {
