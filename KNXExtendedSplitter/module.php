@@ -384,7 +384,7 @@ class KNXExtendedSplitter extends IPSModule
             $table_item['GroupName2'] = $data['GroupName2'];
             $table_item['GroupName3'] = $data['GroupName3'];
             $table_item['Description'] = $data['Description'];
-            $table_item['DPT'] = $data['DPT'];
+            $table_item['DPT'] = (string)$data['DPT'];
             if($dptData = $this->GetDPTData($data['DPT'])) {
                 if(isset($dptData['Parent'])) {
                     $table_item['rowColor'] = "#C0FFC0";
