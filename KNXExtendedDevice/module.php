@@ -4,6 +4,7 @@ require(__DIR__ . '/../KNXExtendedSplitter/module.php');
 class KNXExtendedDevice extends IPSModule
 {
     public $receiveGroupAddresses = null;
+    public $receiveGroupAddresses2 = null;
     public $answerGroupAddresses = null;
     public $sendingGroupAddresses = null;
     public $actuatorScripts = null;
@@ -45,7 +46,7 @@ class KNXExtendedDevice extends IPSModule
             $this->SendDebug("READ", $input['GroupAddress'], 0);
 
             $this->LoadAnswerGA();
-            if($ident = @$this->answerGroupAddresses[$input['GroupAddress']]) {
+            if($ident = $this->GetAnswerIdentForGA($input['GroupAddress'])) {
                 $answerCall = json_encode(
                     array(
                         'GroupAddress' => $input['GroupAddress'],
@@ -63,7 +64,7 @@ class KNXExtendedDevice extends IPSModule
 
             $this->LoadReceiveGA();
 
-            if($idents = @$this->receiveGroupAddresses[$input['GroupAddress']]) {
+            if($idents = $this->GetReceiveIdentsForGA($input['GroupAddress'])) {
                 foreach($idents as $ident) {
                     $status = $this->ExecuteActuatorScript($ident, $input['Value']);
 
@@ -89,6 +90,7 @@ class KNXExtendedDevice extends IPSModule
     {
         // Reset list
         $this->receiveGroupAddresses = array();
+        $this->receiveGroupAddresses2 = array();
         $this->answerGroupAddresses = array();
         $this->sendingGroupAddresses = array();
         $this->actuatorScripts = array();
@@ -209,16 +211,19 @@ class KNXExtendedDevice extends IPSModule
             return;
         }
         
-        $this->SendDebug('RequestAction', 'Process', 0);
+        $this->SendDebug("RequestAction: $ident", $value, 0);
         $this->LoadActuatorScripts();
         if($scriptId = @$this->actuatorScripts[$ident]) {
             // Gibt es ein Aktorscript dann muss sich dieses um alles kümmern
             $this->ExecuteActuatorScript($ident, $value);
         } else {
             $this->LoadSendingGA();
+            $this->LoadReceiveGA();
+            
             $variableId = $this->GetIDForIdent($ident);
-            $sendingGA = @$this->sendingGroupAddresses[$ident];
-            $receiveGA = @$this->receiveGroupAddresses[$ident];
+            $sendingGA = $this->GetSendingGAForIdent($ident);
+            $receiveGA = $this->GetReceiveGAForIdent($ident);
+
             if($sendingGA) {
                 // Sende auf Bus
                 $this->SendValueToParent($sendingGA, $value);
@@ -227,22 +232,50 @@ class KNXExtendedDevice extends IPSModule
             // Sollte es keine StatusGA geben
             // Oder ist ControlGA und StatusGA identisch
             // Dann übernehme den Wert direkt
-            if (!$sendingGA || $sendingGA == $receiveGA) {
+            if (!$receiveGA || $sendingGA == $receiveGA) {
                 SetValue($variableId, $value);
             }
         }
     }
 
-    public function SendValueToBus(int $variableId) {
-        $this->SendDebug('SendValueToBus', $variableId, 0);
+    public function SetActuatorValue(string $ident, $value) {
+        $variableId = $this->GetIDForIdent($ident);
+
+        SetValue($variableId, $value);
 
         $this->LoadSendingGA();
+        $this->LoadReceiveGA();
+        $sendingGA = $this->GetSendingGAForIdent($ident);
+        $receiveGA = $this->GetReceiveGAForIdent($ident);
 
-        $objectData = IPS_GetObject($variableId);
-        $ident = $objectData['ObjectIdent'];
+        // Um einen Loop zu vermeiden darf der Status
+        // nur bei unterschiedlichen GAs gesendet werden.
+        if ($sendingGA != $receiveGA) {
+            $this->SendValueToBus($ident);
+        }
+    }
+    public function SetActuatorValueBoolean(string $ident, bool $value) {
+        $this->SetActuatorValue($ident, $value);
+    }
+    public function SetActuatorValueInteger(string $ident, int $value) {
+        $this->SetActuatorValue($ident, $value);
+    }
+    public function SetActuatorValueFloat(string $ident, float $value) {
+        $this->SetActuatorValue($ident, $value);
+    }
+    public function SetActuatorValueString(string $ident, string $value) {
+        $this->SetActuatorValue($ident, $value);
+    }
 
-        if($ga = @$this->sendingGroupAddresses[$ident]) {
-            $this->SendValueToParent($ga, GetValue($this->GetIDForIdent($ident)));
+    public function SendValueToBus(string $ident) {
+        $this->LoadSendingGA();
+
+        $value = GetValue($this->GetIDForIdent($ident));
+
+        $this->SendDebug("SendValueToBus: $ident", $value, 0);
+
+        if($ga = $this->GetSendingGAForIdent($ident)) {
+            $this->SendValueToParent($ga, $value);
         }
     }
 
@@ -275,6 +308,11 @@ class KNXExtendedDevice extends IPSModule
             $this->receiveGroupAddresses = json_decode(
                 $this->GetBuffer('receiveGroupAddresses'), true
             );
+            foreach ($this->receiveGroupAddresses as $ga => $idents) {
+                foreach ($idents as $ident) {
+                    $this->receiveGroupAddresses2[$ident] = $ga;
+                }
+            }
         }
     }
 
@@ -296,6 +334,42 @@ class KNXExtendedDevice extends IPSModule
                 $this->GetBuffer('sendingGroupAddresses'), true
             );
         }
+    }
+
+    private function GetReceiveIdentsForGA($ga) {
+        $this->LoadReceiveGA();
+        if (array_key_exists($ga, $this->receiveGroupAddresses)) {
+            return $this->receiveGroupAddresses[$ga];
+        }
+
+        return false;
+    }
+
+    private function GetAnswerIdentForGA($ga) {
+        $this->LoadAnswerGA();
+        if (array_key_exists($ga, $this->answerGroupAddresses)) {
+            return $this->answerGroupAddresses[$ga];
+        }
+
+        return false;
+    }
+
+    private function GetReceiveGAForIdent($ident) {
+        $this->LoadReceiveGA();
+        if (is_array($this->receiveGroupAddresses2) && array_key_exists($ident, $this->receiveGroupAddresses2)) {
+            return $this->receiveGroupAddresses2[$ident];
+        }
+
+        return false;
+    }
+
+    private function GetSendingGAForIdent($ident) {
+        $this->LoadSendingGA();
+        if (is_array($this->sendingGroupAddresses) && array_key_exists($ident, $this->sendingGroupAddresses)) {
+            return $this->sendingGroupAddresses[$ident];
+        }
+
+        return false;
     }
 
     private function LoadActuatorScripts()
