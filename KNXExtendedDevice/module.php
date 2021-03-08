@@ -220,13 +220,12 @@ class KNXExtendedDevice extends IPSModule
             if($sendingGA) {
                 // Sende auf Bus
                 $this->SendValueToParent($sendingGA, $value);
-                // Sollte ControlGA und StatusGA identisch sein
-                // so übernehme den Wert direkt, da dann kein Status update kommt
-                if ($receiveGA) {
-                    SetValue($variableId, $value);
-                }
-            } else {
-                // Keine Control GA daher direkt speichern
+            }
+
+            // Sollte es keine StatusGA geben
+            // Oder ist ControlGA und StatusGA identisch
+            // Dann übernehme den Wert direkt
+            if (!$sendingGA || $sendingGA == $receiveGA) {
                 SetValue($variableId, $value);
             }
         }
