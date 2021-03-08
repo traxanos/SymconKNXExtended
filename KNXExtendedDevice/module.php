@@ -32,6 +32,7 @@ class KNXExtendedDevice extends IPSModule
 
     public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
     {
+        $this->SendDebug('MessageSink', $SenderID . '|'. $Message, 0);
         $this->Init();
     }
 
@@ -207,12 +208,13 @@ class KNXExtendedDevice extends IPSModule
         if (!$this->HasActiveParent()) {
             return;
         }
-
+        
+        $this->SendDebug('RequestAction', 'Process', 0);
+        $this->LoadActuatorScripts();
         if($scriptId = @$this->actuatorScripts[$ident]) {
             // Gibt es ein Aktorscript dann muss sich dieses um alles kümmern
             $this->ExecuteActuatorScript($ident, $value);
         } else {
-            // Son
             $this->LoadSendingGA();
             $variableId = $this->GetIDForIdent($ident);
             $sendingGA = @$this->sendingGroupAddresses[$ident];
@@ -232,6 +234,8 @@ class KNXExtendedDevice extends IPSModule
     }
 
     public function SendValueToBus(int $variableId) {
+        $this->SendDebug('SendValueToBus', $variableId, 0);
+
         $this->LoadSendingGA();
 
         $objectData = IPS_GetObject($variableId);
@@ -340,13 +344,14 @@ class KNXExtendedDevice extends IPSModule
         return true;
     }
 
-    private function RegisterActuatorScript(string $ident, $actuatorScriptId)
+    private function RegisterActuatorScript(string $ident, int $scriptId)
     {
         if (!$ident) {
             return false;
         }
 
-        $this->actuatorScripts[$ident] = $actuatorScriptId;
+        $this->SendDebug('RegisterActuatorScript', "$ident = $scriptId", 0);
+        $this->actuatorScripts[$ident] = $scriptId;
         return true;
     }
 
@@ -366,7 +371,7 @@ class KNXExtendedDevice extends IPSModule
         $this->LoadActuatorScripts();
 
         if($scriptId = @$this->actuatorScripts[$ident]) {
-            $this->SendDebug('ExecuteActuatorScript', $ident, 0);
+            $this->SendDebug("ExecuteActuatorScript $ident", $value, 0);
             if(IPS_ScriptExists($scriptId)) {
                 $data = array(
                     'IDENT' => $ident,
@@ -377,16 +382,6 @@ class KNXExtendedDevice extends IPSModule
                 $data = serialize($data);
                 $execute = "IPS_RunScriptEx($scriptId, unserialize('$data'));";
                 $this->RegisterOnceTimer('ExecuteActuatorScript', $execute);
-                // $this->SendDebug("Script", $execute, 0);
-                // IPS_RunScriptEx(
-                //     $scriptId,
-                //     array(
-                //         'IDENT' => $ident,
-                //         'VALUE' => $value,
-                //         'VARIABLE' => $this->GetIDForIdent($ident),
-                //         'INSTANCE' => $this->InstanceID
-                //     )
-                // );
 
                 return true;
             }
