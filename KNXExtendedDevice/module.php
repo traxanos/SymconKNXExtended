@@ -152,11 +152,15 @@ class KNXExtendedDevice extends IPSModule
                         $this->RegisterSendingGA($data['ControlGA'], $data['Ident']);
                     }
 
+                    $instanceName = IPS_GetName($this->InstanceID);
+                    $variableName = $groupData['GroupName3'];
+                    $variableName = str_replace($instanceName, '', $variableName);
+
                     // Build Variable
                     $this->MaintainProfile($dptData['Profile']);
                     $this->MaintainVariable(
                         $data['Ident'],
-                        $groupData['GroupName3'],
+                        $variableName,
                         $this->GetVariableTypByType($dptData['Type']),
                         $dptData['Profile'],
                         0,
