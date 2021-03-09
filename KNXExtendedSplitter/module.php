@@ -384,8 +384,8 @@ class KNXExtendedSplitter extends IPSModule
             $table_item['GroupName2'] = $data['GroupName2'];
             $table_item['GroupName3'] = $data['GroupName3'];
             $table_item['Description'] = $data['Description'];
-            $table_item['DPT'] = (string)$data['DPT'];
-            if($dptData = $this->GetDPTData($data['DPT'])) {
+            $table_item['DPT'] = $data['DPT'];
+            if($dptData = $this->GetDPTData((string)$data['DPT'])) {
                 if(isset($dptData['Parent'])) {
                     $table_item['rowColor'] = "#C0FFC0";
                 } else {
@@ -455,7 +455,6 @@ class KNXExtendedSplitter extends IPSModule
                 foreach ($group1->GroupRange as $group2) {
                     $group_name_2 = (string)$group2['Name'];
                     foreach ($group2->GroupAddress as $group3) {
-                        $dpt = null;
                         $group_name_3 = (string)$group3['Name'];
                         $description = (string)$group3['Description'];
                         if (strpos($group3['Address'], '/') == 0) {
@@ -470,6 +469,8 @@ class KNXExtendedSplitter extends IPSModule
                             $dpt = (string)$group3['DatapointType'];
                         } elseif(isset($group3['DPTs'])) {
                             $dpt = (string)$group3['DPTs'];
+                        } else {
+                            $dpt = '';
                         }
 
                         $data = array(
