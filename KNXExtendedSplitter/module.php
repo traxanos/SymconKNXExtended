@@ -12,7 +12,6 @@ class KNXExtendedSplitter extends IPSModule
 
         $this->ConnectParent('{1C902193-B044-43B8-9433-419F09C641B8}');
         $this->RegisterPropertyString('GroupAddressFile', '');
-        $this->RegisterAttributeString('GroupAddressFileHash', '');
         $this->RegisterAttributeString('GroupAddressTable', '{}');
     }
 
@@ -432,10 +431,10 @@ class KNXExtendedSplitter extends IPSModule
             $xml = base64_decode($this->ReadPropertyString('GroupAddressFile'));
             $hash = sha1($xml);
 
-            if($this->ReadAttributeString('GroupAddressFileHash') == $hash) {
+            if($this->GetBuffer('GroupAddressFileHash') == $hash) {
                 return;
             }
-            $this->WriteAttributeString('GroupAddressFileHash', $hash);
+            $this->SetBuffer('GroupAddressFileHash', $hash);
 
             $simplexml = simplexml_load_string($xml);
             if (isset($simplexml->GroupRange)) {
